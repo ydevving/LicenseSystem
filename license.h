@@ -10,7 +10,7 @@ private:
 public:
 	static void clear_console();
 	static void print_menu();
-	std::string generate_license();
-	bool validate_email(std::string email);
-	bool validate_password(std::string password);
+	static std::string generate_license();
+	static bool validate_email(std::string email);
+	static bool validate_password(std::string password);
 };
