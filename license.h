@@ -8,6 +8,7 @@ class license_framework
 {
 private:
 public:
+	static void main_loop();
 	static void clear_console();
 	static void print_menu();
 	static std::string generate_license();

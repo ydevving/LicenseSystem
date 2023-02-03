@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "license.h"
 
@@ -8,36 +9,86 @@ int main()
 {
     const char* lr = "Login/Register\n\n 1 -> Login \n 2 -> Register \n\nOption: ";
     std::string input, temp;
-    std::fstream accounts_f("accounts.txt");
+    int pos;
+    std::fstream accounts_f;
 
-    bool newly_made = (accounts_f) ? true : false;
+    bool empty_db = false;
 
-    accounts_f.open("accounts.txt", std::ios::app | std::ios::in);
-
-    //std::getline(accounts_f, temp);
-    if (temp == "") newly_made = true;
+    accounts_f.open("accounts.txt", std::fstream::app | std::fstream::in);
+    
+    while (std::getline(accounts_f, temp))
+    {
+        std::cout << temp << '\n';
+        if (temp.find(':') != std::string::npos) break; else empty_db = true; break;
+    }
+    accounts_f.seekg(0);
 
     while (true)
     {
-        license_framework::clear_console();
-        std::cout << accounts_f.is_open() << '\n';
-        std::cout << newly_made << std::endl;
+        //license_framework::clear_console();
+        std::cout << "empty_db -> " << empty_db << std::endl;
         std::cout << lr;
 
         std::getline(std::cin, input);
         
-        if (input == "1" && newly_made == true)
+        if (input == "1" && empty_db == false)
         {
-            std::cout << "De lul";
-            while (std::getline(accounts_f, temp))
+            bool run_loop = true;
+            while (run_loop)
             {
-                std::cout << "Gekke manna\n";
-                std::cout << temp << '\n';
+                std::cout << "Enter a new e-mail: ";
+                std::getline(std::cin, input);
+                std::cout << "Input -> " << input << std::endl;
+
+                if (license_framework::validate_email(input))
+                {
+                    while (std::getline(accounts_f, temp))
+                    {
+                        if ((pos = temp.find(':')) != std::string::npos && (temp = temp.substr(0, pos)) == input)
+                        {
+                            std::cout << "Found email: " << temp << std::endl;
+                            run_loop = false;
+                            break;
+                        }
+                    }
+
+                    accounts_f.clear();
+                    accounts_f.seekg(0, std::ios::beg);
+                }
+                else
+                    std::cerr << "\nInvalid email, please input a valid email address.\n";
             }
-            
-            std::cin.get();
+
+            run_loop = true;
+
+            while (run_loop)
+            {
+                std::cout << "Enter a new password: ";
+                std::getline(std::cin, input);
+
+                if (license_framework::validate_password(input))
+                {
+                    while (std::getline(accounts_f, temp))
+                    {
+                        std::cout << temp << std::endl;
+                        if ((pos = temp.find(':')) != std::string::npos && (temp = temp.substr(pos+1)) == input)
+                        {
+                            std::cout << "Found password: " << temp << std::endl;
+                            run_loop = false;
+                            break;
+                        }
+                    }
+                    
+                    accounts_f.clear();
+                    accounts_f.seekg(0, std::ios::beg);
+                }
+                else
+                    std::cerr << "\nInvalid email, please input a valid email address.\n";
+            }
+
+            license_framework::main_loop();
         }
-        else if (input == "1" && newly_made == true)
+        else if (input == "1" && empty_db == true)
         {
             std::cout << "No active accounts in database, make an account first!\nEnter to continue...";
             std::cin.get();
