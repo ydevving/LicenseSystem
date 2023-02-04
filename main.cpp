@@ -8,7 +8,7 @@
 int main()
 {
     const char* lr = "Login/Register\n\n 1 -> Login \n 2 -> Register \n\nOption: ";
-    std::string input, temp;
+    std::string input, temp, email;
     int pos;
     std::fstream accounts_f;
 
@@ -23,9 +23,11 @@ int main()
     }
     accounts_f.seekg(0);
 
+    // Login/Registration menu
     while (true)
     {
-        //license_framework::clear_console();
+        break;
+        license_framework::clear_console();
         std::cout << "empty_db -> " << empty_db << std::endl;
         std::cout << lr;
 
@@ -38,7 +40,6 @@ int main()
             {
                 std::cout << "Enter a new e-mail: ";
                 std::getline(std::cin, input);
-                std::cout << "Input -> " << input << std::endl;
 
                 if (license_framework::validate_email(input))
                 {
@@ -46,7 +47,7 @@ int main()
                     {
                         if ((pos = temp.find(':')) != std::string::npos && (temp = temp.substr(0, pos)) == input)
                         {
-                            std::cout << "Found email: " << temp << std::endl;
+                            email = temp;
                             run_loop = false;
                             break;
                         }
@@ -73,7 +74,6 @@ int main()
                         std::cout << temp << std::endl;
                         if ((pos = temp.find(':')) != std::string::npos && (temp = temp.substr(pos+1)) == input)
                         {
-                            std::cout << "Found password: " << temp << std::endl;
                             run_loop = false;
                             break;
                         }
@@ -86,7 +86,8 @@ int main()
                     std::cerr << "\nInvalid email, please input a valid email address.\n";
             }
 
-            license_framework::main_loop();
+            std::cout << "Logged in successfully!\n";
+            break;
         }
         else if (input == "1" && empty_db == true)
         {
@@ -134,6 +135,40 @@ int main()
         {
             std::cerr << "Wrong input, choose either 1 or 2!\n";
         }
+    }
+
+    // License menu
+    while (true)
+    {
+        license_framework::clear_console();
+        license_framework::print_menu();
+        
+        while (true)
+        {
+            std::cout << "Option: ";
+            std::getline(std::cin, input);
+
+            if (input.length() > 1)
+                continue;
+
+            switch (input.c_str()[0])
+            {
+            case '1':
+                license_framework::create_license();
+                break;
+            case '2':
+                break;
+            case '3':
+                break;
+            case '4':
+                break;
+            case '5':
+                break;
+            default:
+                continue;
+            }
+        }
+
     }
 
     accounts_f.close();
