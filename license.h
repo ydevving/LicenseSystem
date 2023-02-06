@@ -9,7 +9,8 @@
 
 static int pos;
 static std::string input, temp, email;
-static std::fstream accounts_f, licenses_f;
+static std::fstream accountsf;
+static std::fstream licensesf;
 
 static const char* ascii_art = R"(
 	  _      _                          __      __       _  __ _           _   _             

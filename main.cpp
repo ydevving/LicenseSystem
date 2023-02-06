@@ -10,15 +10,15 @@ int main()
     const char* lr = "Login/Register\n\n 1 -> Login \n 2 -> Register \n\nOption: ";
     bool empty_db = false;
 
-    accounts_f.open("accounts.txt", std::fstream::in | std::fstream::app);
-    licenses_f.open("licenses.txt", std::fstream::in | std::fstream::app);
+    accountsf.open("accounts.txt", std::fstream::in | std::fstream::app);
+    licensesf.open("licenses.txt", std::fstream::in | std::fstream::app);
     
-    while (std::getline(accounts_f, temp))
+    while (std::getline(accountsf, temp))
     {
         if (temp.find(':') != std::string::npos) break; else empty_db = true; break;
     }
 
-    accounts_f.seekg(0);
+    accountsf.seekg(0);
 
     // Login/Registration menu
     while (true)
@@ -30,8 +30,8 @@ int main()
         
         if (input == "1" && empty_db == false)
         {
-            if (!accounts_f.is_open())
-                accounts_f.open("accounts.txt");
+            if (!accountsf.is_open())
+                accountsf.open("accounts.txt");
 
             bool run_loop = true;
             while (run_loop)
@@ -41,7 +41,7 @@ int main()
 
                 if (license::validate_email(input))
                 {
-                    while (std::getline(accounts_f, temp))
+                    while (std::getline(accountsf, temp))
                     {
                         if ((pos = temp.find(':')) != std::string::npos && (temp = temp.substr(0, pos)) == input)
                         {
@@ -51,8 +51,8 @@ int main()
                         }
                     }
 
-                    accounts_f.clear(); //Yo
-                    accounts_f.seekg(0, std::ios::beg);
+                    accountsf.clear();
+                    accountsf.seekg(0, std::ios::beg);
                 }
                 else
                     std::cerr << "\nInvalid email, please input a valid email address.\n";
@@ -67,7 +67,7 @@ int main()
 
                 if (license::validate_password(input))
                 {
-                    while (std::getline(accounts_f, temp))
+                    while (std::getline(accountsf, temp))
                     {
                         std::cout << temp << std::endl;
                         if ((pos = temp.find(':')) != std::string::npos && (temp = temp.substr(pos+1)) == input)
@@ -77,8 +77,8 @@ int main()
                         }
                     }
                     
-                    accounts_f.clear();
-                    accounts_f.seekg(0, std::ios::beg);
+                    accountsf.clear();
+                    accountsf.seekg(0, std::ios::beg);
                 }
                 else
                     std::cerr << "\nInvalid email, please input a valid email address.\n";
@@ -106,7 +106,7 @@ int main()
             }
 
             std::cout << input << '\n';
-            accounts_f << input << ":";
+            accountsf << input << ":";
 
             while (true)
             {
@@ -118,8 +118,8 @@ int main()
                     std::cerr << "\nInvalid password, please remove the \':\' from the input.\n";
             }
 
-            accounts_f << input << "\n";
-            accounts_f.close();
+            accountsf << input << "\n";
+            accountsf.close();
 
             std::cout << "\nSuccessfully created account! (password -> " << input << ")\n";
             std::cout << "\nPress enter to continue...";
@@ -140,6 +140,10 @@ int main()
     {
         license::clear_console();
         license::print_menu();
+        accountsf.flush();
+        accountsf.close();
+        licensesf.flush();
+        licensesf.close();
         
         while (true)
         {
@@ -173,10 +177,10 @@ int main()
 
     }
 
-    if (!accounts_f.is_open())
-        accounts_f.close();
-    if (!licenses_f.is_open())
-        licenses_f.close();
+    if (!accountsf.is_open())
+        accountsf.close();
+    if (!licensesf.is_open())
+        licensesf.close();
 
     std::cin.get();
 }

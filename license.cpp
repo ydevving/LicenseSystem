@@ -1,8 +1,6 @@
 #include "license.h"
 #include "tools.h"
 
-
-
 bool license::exists(const std::string& name) {
     struct stat buffer;
     return (stat(name.c_str(), &buffer) == 0);
@@ -42,18 +40,19 @@ bool license::validate_password(const std::string& password)
 
 void license::io_check()
 {
-    if (!accounts_f.is_open())
+    std::cout << "io_check\n";
+    if (!accountsf.is_open())
     {
-        accounts_f.open("accounts.txt", std::fstream::in | std::fstream::app);
-        accounts_f.clear();
-        accounts_f.seekg(0, std::ios::beg);
+        accountsf.open("accounts.txt", std::fstream::in | std::fstream::app);
+        accountsf.clear();
+        accountsf.seekg(0, std::ios::beg);
     }
 
-    if (!licenses_f.is_open())
+    if (!licensesf.is_open())
     {
-        licenses_f.open("licenses.txt", std::fstream::in | std::fstream::app);
-        licenses_f.clear();
-        licenses_f.seekg(0, std::ios::beg);
+        licensesf.open("licenses.txt", std::fstream::in | std::fstream::app);
+        licensesf.clear();
+        licensesf.seekg(0, std::ios::beg);
     }
 }
 
@@ -62,10 +61,10 @@ std::string license::create_license(const std::string& email)
     license::io_check();
 
     std::string uuid = uuid::generate_uuid_v4();
-    licenses_f << uuid << ":" << email << "\n";
+    licensesf << uuid << ":" << email << "\n";
     std::cout << uuid << std::endl;
 
-    licenses_f.close();
+    licensesf.close();
 
     return uuid;
 }
@@ -83,7 +82,7 @@ bool license::delete_license(const std::string& email)
         exit(-1);
     }
 
-    while (std::getline(licenses_f, temp))
+    while (std::getline(licensesf, temp))
     {
         if ((pos = temp.find(':')) != std::string::npos && (input = temp.substr(pos+1)) == email)
         {
@@ -98,15 +97,17 @@ bool license::delete_license(const std::string& email)
         }
     }
 
-    tempf.close();
-    licenses_f.close();
+    licensesf.clear();
 
-    std::cout << "Open? " << licenses_f.is_open() << "\n";
+    tempf.close();
+    std::cout << "Bit before: " << licensesf.rdstate() << "\n";
+    licensesf.close();
+    std::cout << "Bit after: " << licensesf.rdstate() << "\n";
 
     std::cout << "Remove!\n";
-    std::cout << std::remove("./licenses.txt") << "\n";
+    std::cout << std::remove("licenses.txt") << "\n";
     perror("The following error occurred");
-    //std::cout << std::rename("./temp.txt", "./licenses.txt") << "\n";
+    std::cout << std::rename("./temp.txt", "./licenses.txt") << "\n";
 
     std::cout << "Exists: " << license::exists("licenses.txt") << " | " << license::exists("temp.txt") << "\n";
 
