@@ -8,40 +8,38 @@
 int main()
 {
     const char* lr = "Login/Register\n\n 1 -> Login \n 2 -> Register \n\nOption: ";
-    std::string input, temp, email;
-    int pos;
-    std::fstream accounts_f;
-
     bool empty_db = false;
 
-    accounts_f.open("accounts.txt", std::fstream::app | std::fstream::in);
+    accounts_f.open("accounts.txt", std::fstream::in | std::fstream::app);
+    licenses_f.open("licenses.txt", std::fstream::in | std::fstream::app);
     
     while (std::getline(accounts_f, temp))
     {
-        std::cout << temp << '\n';
         if (temp.find(':') != std::string::npos) break; else empty_db = true; break;
     }
+
     accounts_f.seekg(0);
 
     // Login/Registration menu
     while (true)
     {
-        break;
-        license_framework::clear_console();
-        std::cout << "empty_db -> " << empty_db << std::endl;
+        license::clear_console();
         std::cout << lr;
 
         std::getline(std::cin, input);
         
         if (input == "1" && empty_db == false)
         {
+            if (!accounts_f.is_open())
+                accounts_f.open("accounts.txt");
+
             bool run_loop = true;
             while (run_loop)
             {
                 std::cout << "Enter a new e-mail: ";
                 std::getline(std::cin, input);
 
-                if (license_framework::validate_email(input))
+                if (license::validate_email(input))
                 {
                     while (std::getline(accounts_f, temp))
                     {
@@ -53,7 +51,7 @@ int main()
                         }
                     }
 
-                    accounts_f.clear();
+                    accounts_f.clear(); //Yo
                     accounts_f.seekg(0, std::ios::beg);
                 }
                 else
@@ -67,7 +65,7 @@ int main()
                 std::cout << "Enter a new password: ";
                 std::getline(std::cin, input);
 
-                if (license_framework::validate_password(input))
+                if (license::validate_password(input))
                 {
                     while (std::getline(accounts_f, temp))
                     {
@@ -101,7 +99,7 @@ int main()
             {
                 std::cout << "Enter a new e-mail: ";
                 std::getline(std::cin, input);
-                if (license_framework::validate_email(input))
+                if (license::validate_email(input))
                     break;
                 else
                     std::cerr << "\nInvalid email, please input a valid email address.\n";
@@ -114,7 +112,7 @@ int main()
             {
                 std::cout << "Enter a new password: ";
                 std::getline(std::cin, input);
-                if (license_framework::validate_password(input))
+                if (license::validate_password(input))
                     break;
                 else
                     std::cerr << "\nInvalid password, please remove the \':\' from the input.\n";
@@ -140,8 +138,8 @@ int main()
     // License menu
     while (true)
     {
-        license_framework::clear_console();
-        license_framework::print_menu();
+        license::clear_console();
+        license::print_menu();
         
         while (true)
         {
@@ -154,15 +152,19 @@ int main()
             switch (input.c_str()[0])
             {
             case '1':
-                license_framework::create_license();
+                license::create_license(email);
                 break;
             case '2':
+                license::delete_license(email);
                 break;
             case '3':
+                //license::validate_license(email);
                 break;
             case '4':
+                //license::update_license(email);
                 break;
             case '5':
+                //license::license_expiration(email);
                 break;
             default:
                 continue;
@@ -171,7 +173,10 @@ int main()
 
     }
 
-    accounts_f.close();
+    if (!accounts_f.is_open())
+        accounts_f.close();
+    if (!licenses_f.is_open())
+        licenses_f.close();
 
     std::cin.get();
 }
