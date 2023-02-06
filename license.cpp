@@ -97,16 +97,14 @@ bool license::delete_license(const std::string& email)
         }
     }
 
+    // Clears bit to 'good' state after reading operation, so we can remove the file. Otherwise no perms error as file handle is open
     licensesf.clear();
 
     tempf.close();
-    std::cout << "Bit before: " << licensesf.rdstate() << "\n";
     licensesf.close();
-    std::cout << "Bit after: " << licensesf.rdstate() << "\n";
-
+;
     std::cout << "Remove!\n";
     std::cout << std::remove("licenses.txt") << "\n";
-    perror("The following error occurred");
     std::cout << std::rename("./temp.txt", "./licenses.txt") << "\n";
 
     std::cout << "Exists: " << license::exists("licenses.txt") << " | " << license::exists("temp.txt") << "\n";

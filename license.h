@@ -7,7 +7,7 @@
 #include <sys/stat.h>
 #include <filesystem>
 
-static int pos;
+static size_t pos;
 static std::string input, temp, email;
 static std::fstream accountsf;
 static std::fstream licensesf;
