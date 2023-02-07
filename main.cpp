@@ -7,7 +7,7 @@
 
 int main()
 {
-    const char* lr = "Login/Register\n\n 1 -> Login \n 2 -> Register \n\nOption: ";
+    const char* lr = "Login/Register\n\n 1 -> Login \n 2 -> Register \n 3 -> Exit\n\nOption: ";
     bool empty_db = false;
 
     accountsf.open("accounts.txt", std::fstream::in | std::fstream::app);
@@ -43,6 +43,7 @@ int main()
                 {
                     while (std::getline(accountsf, temp))
                     {
+                        std::cout << temp << std::endl;
                         if ((pos = temp.find(':')) != std::string::npos && (temp = temp.substr(0, pos)) == input)
                         {
                             email = temp;
@@ -140,10 +141,6 @@ int main()
     {
         license::clear_console();
         license::print_menu();
-        accountsf.flush();
-        accountsf.close();
-        licensesf.flush();
-        licensesf.close();
         
         while (true)
         {
@@ -156,18 +153,21 @@ int main()
             switch (input.c_str()[0])
             {
             case '1':
-                license::create_license(email);
+                license::show_licenses(email);
                 break;
             case '2':
-                license::delete_license(email);
+                license::create_license(email);
                 break;
             case '3':
-                //license::validate_license(email);
+                license::delete_license(email);
                 break;
             case '4':
-                //license::update_license(email);
+                license::validate_license(email);
                 break;
             case '5':
+                //license::update_license(email);
+                break;
+            case '6':
                 //license::license_expiration(email);
                 break;
             default:

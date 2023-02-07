@@ -1,9 +1,9 @@
 #include "license.h"
 #include "tools.h"
 
-bool license::exists(const std::string& name) {
+bool license::exists(const char* name) {
     struct stat buffer;
-    return (stat(name.c_str(), &buffer) == 0);
+    return (stat(name, &buffer) == 0);
 }
 
 void license::clear_console()
@@ -56,6 +56,45 @@ void license::io_check()
     }
 }
 
+void license::show_licenses(const std::string& email)
+{
+    license::io_check();
+
+    if (!licensesf.is_open()) return;
+
+    std::cout << "Past checks\n";
+    std::cout << email << '\n';
+
+    bool present = false;
+
+    input = "---------------------------------------\n";
+
+    std::cout << licensesf.rdstate() << "\n";
+
+    while (std::getline(licensesf, temp))
+    {
+        std::cout << temp << '\n';
+        if ((pos = temp.find(':')) != std::string::npos && (temp.substr(pos + 1)) == email)
+        {
+            if (!present) present = true;
+            input += "|";
+            input += temp.substr(0, pos);;
+            input += "|";
+            input += "\n";
+        }
+    }
+
+    if (present)
+        input += "---------------------------------------\n";
+    else
+        input = "\nNo licenses present! Create one.\n";
+
+    std::cout << input << "\n";
+
+    licensesf.clear();
+    licensesf.seekg(0, std::ios::beg);
+}
+
 std::string license::create_license(const std::string& email)
 {
     license::io_check();
@@ -99,15 +138,49 @@ bool license::delete_license(const std::string& email)
 
     // Clears bit to 'good' state after reading operation, so we can remove the file. Otherwise no perms error as file handle is open
     licensesf.clear();
+    licensesf.seekg(0, std::ios::beg);
 
     tempf.close();
     licensesf.close();
 ;
     std::cout << "Remove!\n";
     std::cout << std::remove("licenses.txt") << "\n";
-    std::cout << std::rename("./temp.txt", "./licenses.txt") << "\n";
+    std::cout << std::rename("temp.txt", "licenses.txt") << "\n";
 
     std::cout << "Exists: " << license::exists("licenses.txt") << " | " << license::exists("temp.txt") << "\n";
 
     return true;
+}
+
+void license::validate_license(const std::string& email)
+{
+    license::io_check();
+
+    bool found_license = false;
+
+    while (true)
+    {
+        std::cout << "\nEnter your license: ";
+        std::getline(std::cin, input);
+
+        while (std::getline(licensesf, temp))
+        {
+            if ((pos = temp.find(':')) != std::string::npos && (temp.substr(pos + 1)) == email && (temp = temp.substr(0, pos)) == input)
+            {
+                found_license = true;
+                break;
+            }
+        }
+
+        licensesf.clear();
+        licensesf.seekg(0, std::ios::beg);
+
+        if (found_license)
+        {
+            std::cout << "Your active license found - " << temp << "\n";
+            break;
+        }
+        else
+            std::cerr << "\nInvalid license.\n";
+    }
 }
