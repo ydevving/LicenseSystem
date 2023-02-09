@@ -4,34 +4,39 @@
 #include <vector>
 
 #include "license.h"
+#include "tools.h"
 
 int main()
 {
     const char* lr = "Login/Register\n\n 1 -> Login \n 2 -> Register \n 3 -> Exit\n\nOption: ";
     bool empty_db = false;
 
-    accountsf.open("accounts.txt", std::fstream::in | std::fstream::app);
-    licensesf.open("licenses.txt", std::fstream::in | std::fstream::app);
+    std::fstream aFile, lFile;
+    std::string input, temp, email;
+    size_t pos;
+
+    aFile.open("accounts.txt", std::fstream::in | std::fstream::app);
+    lFile.open("licenses.txt", std::fstream::in | std::fstream::app);
     
-    while (std::getline(accountsf, temp))
+    while (std::getline(aFile, temp))
     {
         if (temp.find(':') != std::string::npos) break; else empty_db = true; break;
     }
 
-    accountsf.seekg(0);
+    aFile.seekg(0);
 
     // Login/Registration menu
     while (true)
     {
-        license::clear_console();
+        Tools::clear_console();
         std::cout << lr;
 
         std::getline(std::cin, input);
         
         if (input == "1" && empty_db == false)
         {
-            if (!accountsf.is_open())
-                accountsf.open("accounts.txt");
+            if (!aFile.is_open())
+                aFile.open("accounts.txt");
 
             bool run_loop = true;
             while (run_loop)
@@ -39,21 +44,19 @@ int main()
                 std::cout << "Enter a new e-mail: ";
                 std::getline(std::cin, input);
 
-                if (license::validate_email(input))
+                if (Tools::validate_email(input))
                 {
-                    while (std::getline(accountsf, temp))
+                    while (std::getline(aFile, temp))
                     {
-                        std::cout << temp << std::endl;
-                        if ((pos = temp.find(':')) != std::string::npos && (temp = temp.substr(0, pos)) == input)
+                        if ((pos = temp.find(':')) != std::string::npos && (email = temp.substr(0, pos)) == input)
                         {
-                            email = temp;
                             run_loop = false;
                             break;
                         }
                     }
 
-                    accountsf.clear();
-                    accountsf.seekg(0, std::ios::beg);
+                    aFile.clear();
+                    aFile.seekg(0, std::ios::beg);
                 }
                 else
                     std::cerr << "\nInvalid email, please input a valid email address.\n";
@@ -66,9 +69,9 @@ int main()
                 std::cout << "Enter a new password: ";
                 std::getline(std::cin, input);
 
-                if (license::validate_password(input))
+                if (Tools::validate_password(input))
                 {
-                    while (std::getline(accountsf, temp))
+                    while (std::getline(aFile, temp))
                     {
                         std::cout << temp << std::endl;
                         if ((pos = temp.find(':')) != std::string::npos && (temp = temp.substr(pos+1)) == input)
@@ -78,8 +81,8 @@ int main()
                         }
                     }
                     
-                    accountsf.clear();
-                    accountsf.seekg(0, std::ios::beg);
+                    aFile.clear();
+                    aFile.seekg(0, std::ios::beg);
                 }
                 else
                     std::cerr << "\nInvalid email, please input a valid email address.\n";
@@ -96,31 +99,31 @@ int main()
         }
         else if (input == "2")
         {
+            aFile.clear();
+            aFile.seekg(0);
+
             while (true)
             {
                 std::cout << "Enter a new e-mail: ";
-                std::getline(std::cin, input);
-                if (license::validate_email(input))
+                std::getline(std::cin, temp);
+                if (Tools::validate_email(temp))
                     break;
                 else
                     std::cerr << "\nInvalid email, please input a valid email address.\n";
             }
 
-            std::cout << input << '\n';
-            accountsf << input << ":";
-
             while (true)
             {
                 std::cout << "Enter a new password: ";
                 std::getline(std::cin, input);
-                if (license::validate_password(input))
+                if (Tools::validate_password(input))
                     break;
                 else
                     std::cerr << "\nInvalid password, please remove the \':\' from the input.\n";
             }
 
-            accountsf << input << "\n";
-            accountsf.close();
+            aFile << temp << ":" << input << "\n";
+            aFile.close();
 
             std::cout << "\nSuccessfully created account! (password -> " << input << ")\n";
             std::cout << "\nPress enter to continue...";
@@ -128,7 +131,7 @@ int main()
         }
         else if (input == "3")
         {
-            break;
+            exit(0);
         }
         else
         {
@@ -137,10 +140,20 @@ int main()
     }
 
     // License menu
+
+    if (!Tools::validate_email(email) || !lFile || !aFile)
+    {
+        std::cout << "Error encountered creating License object!\n";
+        exit(-1);
+    }
+
+    License account(email, &lFile, &aFile);
+
     while (true)
     {
-        license::clear_console();
-        license::print_menu();
+        
+        Tools::clear_console();
+        Tools::print_menu();
         
         while (true)
         {
@@ -153,34 +166,28 @@ int main()
             switch (input.c_str()[0])
             {
             case '1':
-                license::show_licenses(email);
+                account.show_licenses(email);
                 break;
             case '2':
-                license::create_license(email);
+                account.create_license(email);
                 break;
             case '3':
-                license::delete_license(email);
+                account.delete_license(email);
                 break;
             case '4':
-                license::validate_license(email);
-                break;
-            case '5':
-                //license::update_license(email);
-                break;
-            case '6':
-                //license::license_expiration(email);
+                account.validate_license(email);
                 break;
             default:
-                continue;
+                break;
             }
         }
 
     }
 
-    if (!accountsf.is_open())
-        accountsf.close();
-    if (!licensesf.is_open())
-        licensesf.close();
+    if (aFile.is_open())
+        aFile.close();
+    if (lFile.is_open())
+        lFile.close();
 
     std::cin.get();
 }
