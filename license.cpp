@@ -18,15 +18,16 @@ License::~License()
     m_aFile = nullptr;
 }
 
-void License::show_licenses(const std::string& email)
+void License::show_licenses()
 {
-    if (!m_lFile->is_open()) return;
+    if (!m_lFile->is_open()) m_lFile->open("licenses.txt", std::fstream::in | std::fstream::app);
 
+    bool present = false;
     c2 = "---------------------------------------\n";
 
     while (std::getline(*m_lFile, c1))
     {
-        if ((pos = c1.find(':')) != std::string::npos && (c1.substr(pos + 1)) == email)
+        if ((pos = c1.find(':')) != std::string::npos && c1.substr(pos + 1) == m_Email)
         {
             if (!present) present = true;
             c2 += "|";
@@ -46,11 +47,13 @@ void License::show_licenses(const std::string& email)
     std::cout << c2 << "\n";
 }
 
-std::string License::create_license(const std::string& email)
+std::string License::create_license()
 {
+    if (!m_lFile->is_open()) m_lFile->open("licenses.txt", std::fstream::in | std::fstream::app);
+
     std::string uuid = Tools::generate_uuid_v4();
 
-    *m_lFile << uuid << ":" << email << "\n";
+    *m_lFile << uuid << ":" << m_Email << "\n";
     std::cout << uuid << std::endl;
 
     m_lFile->close();
@@ -58,8 +61,10 @@ std::string License::create_license(const std::string& email)
     return uuid;
 }
 
-bool License::delete_license(const std::string& email)
+bool License::delete_license()
 {
+    if (!m_lFile->is_open()) m_lFile->open("licenses.txt", std::fstream::in | std::fstream::app);
+
     std::ofstream tempf;
     tempf.open("temp.txt", std::ofstream::out);
 
@@ -71,16 +76,10 @@ bool License::delete_license(const std::string& email)
 
     while (std::getline(*m_lFile, c1))
     {
-        if ((pos = c1.find(':')) != std::string::npos && c1.substr(pos+1) == email)
-        {
-            std::cout << "Found, removing line\n";
+        if ((pos = c1.find(':')) != std::string::npos && c1.substr(pos+1) == m_Email)
             continue;
-        }
         else
-        {
-            std::cout << "Else\n" << c1 << "\n";
             tempf << c1 << "\n";
-        }
     }
 
     // Clears bit to 'good' state after reading operation, so we can remove the file. Otherwise no perms error as file handle is open
@@ -89,17 +88,16 @@ bool License::delete_license(const std::string& email)
     m_lFile->close();
     tempf.close();
 
-    std::cout << std::remove("licenses.txt") << "\n";
-    perror("Error occured");
-    std::cout << std::rename("temp.txt", "licenses.txt") << "\n";
-
-    std::cout << "Exists: " << Tools::exists("licenses.txt") << " | " << Tools::exists("temp.txt") << "\n";
+    std::remove("licenses.txt");
+    std::rename("temp.txt", "licenses.txt");
 
     return true;
 }
 
-void License::validate_license(const std::string& email)
+void License::validate_license()
 {
+    if (!m_lFile->is_open()) m_lFile->open("licenses.txt", std::fstream::in | std::fstream::app);
+
     bool found_license = false;
 
     while (true)
@@ -109,7 +107,7 @@ void License::validate_license(const std::string& email)
 
         while (std::getline(*m_lFile, c1))
         {
-            if ((pos = c1.find(':')) != std::string::npos && (c1.substr(pos + 1)) == email && (c1 = c1.substr(0, pos)) == c2)
+            if ((pos = c1.find(':')) != std::string::npos && (c1.substr(pos + 1)) == m_Email && (c1 = c1.substr(0, pos)) == c2)
             {
                 found_license = true;
                 break;
@@ -124,7 +122,9 @@ void License::validate_license(const std::string& email)
             break;
         }
         else
+        {
             std::cerr << "\nInvalid license.\n";
+        }
     }
 }
 

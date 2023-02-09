@@ -8,7 +8,6 @@
 
 int main()
 {
-    const char* lr = "Login/Register\n\n 1 -> Login \n 2 -> Register \n 3 -> Exit\n\nOption: ";
     bool empty_db = false;
 
     std::fstream aFile, lFile;
@@ -29,7 +28,7 @@ int main()
     while (true)
     {
         Tools::clear_console();
-        std::cout << lr;
+        std::cout << "Login/Register\n\n 1 -> Login \n 2 -> Register \n 3 -> Exit\n\nOption: ";
 
         std::getline(std::cin, input);
         
@@ -166,16 +165,16 @@ int main()
             switch (input.c_str()[0])
             {
             case '1':
-                account.show_licenses(email);
+                account.show_licenses();
                 break;
             case '2':
-                account.create_license(email);
+                account.create_license();
                 break;
             case '3':
-                account.delete_license(email);
+                account.delete_license();
                 break;
             case '4':
-                account.validate_license(email);
+                account.validate_license();
                 break;
             default:
                 break;
